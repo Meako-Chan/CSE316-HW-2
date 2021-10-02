@@ -10,6 +10,7 @@ export default class DBManager {
     queryIsList = (key) => {
         let list = localStorage.getItem("top5-list-" + key);
         return list != null;
+        
     }
 
     /**
@@ -19,6 +20,12 @@ export default class DBManager {
     queryGetList = (key) => {
         let listString = localStorage.getItem("top5-list-" + key);
         return JSON.parse(listString);
+    }
+
+    queryDeleteList = (key) => {
+
+        localStorage.removeItem("top5-list-" + key);
+        
     }
 
     mutationCreateList = (list) => {
@@ -33,6 +40,7 @@ export default class DBManager {
     
     mutationUpdateSessionData = (sessionData) => {
         let sessionDataString = JSON.stringify(sessionData);
+        console.log(sessionDataString);
         localStorage.setItem("top5-data", sessionDataString);
     }
 }

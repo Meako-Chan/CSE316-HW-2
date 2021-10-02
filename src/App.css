@@ -200,6 +200,35 @@ body {
   height:20%;
 }
 
+.item-card, .selected-item-card, .unselected-item-card {
+  text-align: left;
+  display: flex;
+  width:95%;
+  height:20%;
+  padding-left:5%;
+  
+}
+
+/* .unselected-item-card:hover {
+  cursor: pointer;
+  background-color: var(--swatch-contrast);
+  color:white;
+} */
+
+.selected-item-card {
+  background-color: var(--swatch-accent);
+  /* color: white; */
+}
+
+.unselected-item-card {
+  background-color: var(--swatch-complement);
+}
+
+.item-card-button {
+  float:right;
+  font-size:18pt;
+}
+
 .item-number {
   justify-content: center;
   width:100%;

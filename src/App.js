@@ -24,6 +24,8 @@ class App extends React.Component {
         // SETUP THE INITIAL STATE
         this.state = {
             currentList : null,
+            deleteSelectedList : null,
+            currentItemKey : null,
             sessionData : loadedSessionData
         }
     }
@@ -31,6 +33,11 @@ class App extends React.Component {
         keyNamePairs.sort((keyPair1, keyPair2) => {
             // GET THE LISTS
             return keyPair1.name.localeCompare(keyPair2.name);
+        });
+    }
+    sortItemsByName = (items) =>{
+        items.sort((item1,item2) => {
+            return item1.localeCompare(item2);
         });
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CREATING A NEW LIST
@@ -103,6 +110,31 @@ class App extends React.Component {
             this.db.mutationUpdateList(list);
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
+        
+    }
+    renameItem = (id, newName) => {
+        let items = this.state.currentList.items;
+        console.log(this.state.sessionData);
+        console.log(this.state.currentList);
+        // NOW GO THROUGH THE ARRAY AND FIND THE ONE TO RENAME
+        for (let i = 0; i < items.length; i++) {
+            let tempItem = items[i];
+            if (i === id) {
+                items[i] = newName;
+            }
+        }
+        console.log(items);
+         this.sortItemsByName(items);
+
+        let tempList = this.state.currentList;
+        let tempItems = tempList.items;
+        tempItems = items;
+        console.log(tempList);
+        this.setState({currentList: tempList});
+        console.log(this.state);
+        this.db.mutationUpdateList(tempList);
+    
+        
     }
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
@@ -124,12 +156,70 @@ class App extends React.Component {
             // ANY AFTER EFFECTS?
         });
     }
-    deleteList = () => {
+    deleteList = (e) => {
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL
+        console.log(e);
+        this.setState({deleteSelectedList : e});
+        console.log(this.state.sessionData);
+
         this.showDeleteListModal();
+        
+
+    }
+
+    selectItem = (e) => {
+        // changed the currentItem to e
+        // Note: e is the id/position of the item
+        // console.log(e);
+        // let tempItem = this.state.currentList.items[e]
+        // console.log(tempItem);
+        this.setState({currentItemKey: e});
+    }
+
+    confirmDeleteList = (e) => {
+        // this.setState(prevState => ({
+        //     sessionData: prevState.sessionData.keyNamePairs.filter(pair => pair.key !== this.state.deleteSelectedList.key)
+        // }));
+        // this.setState(prevState => {
+        //     console.log(prevState.sessionData.keyNamePairs);
+        //     console.log(this.state.deleteSelectedList.key);
+        let x = this.state.sessionData;
+        let newKeyNamePairs = x.keyNamePairs;
+
+        var newSessionData = this.state.sessionData.keyNamePairs.filter(pair => pair.key !== this.state.deleteSelectedList.key);
+        newKeyNamePairs = newSessionData;
+        x.keyNamePairs = newKeyNamePairs;
+        this.setState({x});
+        // this.setState({sessionData })
+
+        //     return { sessionData };
+        // });
+
+        // var newArray = [];
+        // console.log(this.state.sessionData.keyNamePairs);
+        // for (let i=0; i<this.state.sessionData.counter; i++){
+        //     if (this.state.sessionData.keyNamePairs[i].key != this.state.deleteSelectedList.key){
+                
+        //         console.log("adding");
+        //         console.log(this.state.sessionData.keyNamePairs[i]);
+        //         newArray.push(this.state.sessionData.keyNamePairs[i])
+        //     }
+        // }
+        // this.setState({sessionData: newArray});
+        // // console.log(this.state.sessionData);
+
+        let CurrentDeleteList = this.db.queryGetList(this.state.deleteSelectedList.key);
+        // CurrentDeleteList = null;
+        console.log(CurrentDeleteList);
+        // this.db.mutationUpdateList(CurrentDeleteList);
+        this.db.queryDeleteList(this.state.deleteSelectedList.key);
+        this.db.mutationUpdateSessionData(this.state.sessionData);
+
+        this.hideDeleteListModal(); // hide after deleting
+    
     }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
     // TO SEE IF THEY REALLY WANT TO DELETE THE LIST
@@ -158,11 +248,14 @@ class App extends React.Component {
                     renameListCallback={this.renameList}
                 />
                 <Workspace
-                    currentList={this.state.currentList} />
+                    currentList={this.state.currentList} currentItemKey={this.state.currentItemKey} selectItemCallback={this.selectItem} renameItemCallback={this.renameItem}/>
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal
+                    listKeyPair={this.state.currentList}
+                    deleteSelectedList={this.state.deleteSelectedList}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
+                    confirmDeleteListCallback={this.confirmDeleteList}
                 />
             </div>
         );

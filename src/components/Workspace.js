@@ -1,11 +1,15 @@
 import React from "react";
+import ItemCard from "./ItemCard";
 
 
 export default class Workspace extends React.Component {
     render() {
-        // console.log(this.props);
+        console.log(this.props);
         const {
-            currentList
+            currentList,
+            currentItemKey,
+            selectItemCallback,
+            renameItemCallback
         } = this.props;
         if (currentList){
         return (
@@ -19,11 +23,25 @@ export default class Workspace extends React.Component {
                         <div className="item-number">5.</div>
                     </div>
                     <div id="edit-items">
-                        <div className="top5-item">{currentList.items[0]}</div>
+                        {/* <div className="top5-item">{currentList.items[0]}</div>
                         <div className="top5-item">{ currentList.items[1]}</div>
                         <div className="top5-item">{currentList.items[2]}</div>
                         <div className="top5-item">{currentList.items[3]}</div>
-                        <div className="top5-item">{currentList.items[4]}</div>
+                        <div className="top5-item">{currentList.items[4]}</div> */}
+                        {
+                            currentList.items.map(function(item, index){
+                                return (
+                                <ItemCard
+                                    id={index}
+                                    key={index}
+                                    keyNamePair={item}
+                                    selected={(currentItemKey !== null) && (currentItemKey === item.key)}
+                                    selectItemCallback={selectItemCallback}
+                                    renameItemCallback={renameItemCallback}
+                            />
+                                )
+                            })
+                        }
                     </div>
                 </div>
             </div>
