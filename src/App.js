@@ -180,12 +180,6 @@ class App extends React.Component {
     }
 
     confirmDeleteList = (e) => {
-        // this.setState(prevState => ({
-        //     sessionData: prevState.sessionData.keyNamePairs.filter(pair => pair.key !== this.state.deleteSelectedList.key)
-        // }));
-        // this.setState(prevState => {
-        //     console.log(prevState.sessionData.keyNamePairs);
-        //     console.log(this.state.deleteSelectedList.key);
         let x = this.state.sessionData;
         let newKeyNamePairs = x.keyNamePairs;
 
@@ -193,25 +187,22 @@ class App extends React.Component {
         newKeyNamePairs = newSessionData;
         x.keyNamePairs = newKeyNamePairs;
         this.setState({x});
-        // this.setState({sessionData })
-
-        //     return { sessionData };
-        // });
-
-        // var newArray = [];
-        // console.log(this.state.sessionData.keyNamePairs);
-        // for (let i=0; i<this.state.sessionData.counter; i++){
-        //     if (this.state.sessionData.keyNamePairs[i].key != this.state.deleteSelectedList.key){
-                
-        //         console.log("adding");
-        //         console.log(this.state.sessionData.keyNamePairs[i]);
-        //         newArray.push(this.state.sessionData.keyNamePairs[i])
-        //     }
-        // }
-        // this.setState({sessionData: newArray});
-        // // console.log(this.state.sessionData);
-
-        let CurrentDeleteList = this.db.queryGetList(this.state.deleteSelectedList.key);
+        let updatedPairs = newKeyNamePairs;
+        for(let i=0; i< updatedPairs.length;i++){
+            updatedPairs[i].key = i;
+        }
+        console.log(updatedPairs);
+        this.setState(prevState => ({
+            currentList: null,
+            sessionData: {
+                nextKey: prevState.sessionData.nextKey - 1,
+                counter: prevState.sessionData.counter - 1,
+                keyNamePairs: updatedPairs
+            }
+        }), () => {
+            // PUTTING THIS NEW LIST IN PERMANENT STORAGE
+            // IS AN AFTER EFFECT
+            let CurrentDeleteList = this.db.queryGetList(this.state.deleteSelectedList.key);
         // CurrentDeleteList = null;
         console.log(CurrentDeleteList);
         // this.db.mutationUpdateList(CurrentDeleteList);
@@ -219,6 +210,8 @@ class App extends React.Component {
         this.db.mutationUpdateSessionData(this.state.sessionData);
 
         this.hideDeleteListModal(); // hide after deleting
+    
+        });
     
     }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
