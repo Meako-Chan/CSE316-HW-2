@@ -26,7 +26,8 @@ class App extends React.Component {
             currentList : null,
             deleteSelectedList : null,
             currentItemKey : null,
-            sessionData : loadedSessionData
+            sessionData : loadedSessionData,
+            dropped: null
         }
     }
     sortKeyNamePairsByName = (keyNamePairs) => {
@@ -40,6 +41,9 @@ class App extends React.Component {
             return item1.localeCompare(item2);
         });
     }
+    // sortDrag = (items) => {
+    //     items.slice(5)-1,items.id.slice(5)-1;
+    // }
     // THIS FUNCTION BEGINS THE PROCESS OF CREATING A NEW LIST
     createNewList = () => {
         // FIRST FIGURE OUT WHAT THE NEW LIST'S KEY AND NAME WILL BE
@@ -112,6 +116,33 @@ class App extends React.Component {
         });
         
     }
+    dropItem = (e) =>{
+        let items = this.state.currentList.items;
+        
+        let index1 = this.state.currentItemKey;
+        let index2 = e;
+        let item1 = this.state.currentList.items[index1];
+        items.splice(index1, 1);
+        items.splice(index2,0, item1);
+        
+
+        let tempList = this.state.currentList;
+        let tempItems = tempList.items;
+        tempItems = items;
+     
+        this.setState(prevState => ({
+            currentList: tempList
+        }), () => {
+            // ANY AFTER EFFECTS?
+            console.log(this.state.currentList.items);
+         
+            this.db.mutationUpdateList(this.state.currentList);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
+        });
+      
+        
+       
+    }
     renameItem = (id, newName) => {
         let items = this.state.currentList.items;
         console.log(this.state.sessionData);
@@ -124,7 +155,7 @@ class App extends React.Component {
             }
         }
         console.log(items);
-         this.sortItemsByName(items);
+        //  this.sortItemsByName(items);
 
         let tempList = this.state.currentList;
         let tempItems = tempList.items;
@@ -177,8 +208,9 @@ class App extends React.Component {
         // let tempItem = this.state.currentList.items[e]
         // console.log(tempItem);
         this.setState({currentItemKey: e});
+        console.log(this.state.currentItemKey);
     }
-
+  
     confirmDeleteList = (e) => {
         let x = this.state.sessionData;
         let newKeyNamePairs = x.keyNamePairs;
@@ -241,7 +273,7 @@ class App extends React.Component {
                     renameListCallback={this.renameList}
                 />
                 <Workspace
-                    currentList={this.state.currentList} currentItemKey={this.state.currentItemKey} selectItemCallback={this.selectItem} renameItemCallback={this.renameItem}/>
+                    currentList={this.state.currentList} currentItemKey={this.state.currentItemKey} selectItemCallback={this.selectItem} renameItemCallback={this.renameItem} dropItemCallback={this.dropItem} dropped ={this.state.dropped}/>
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal

@@ -21,6 +21,7 @@ export default class ItemCard extends React.Component {
             this.handleToggleEdit(event);
         }
     }
+  
     handleLoadItem = (event) => {
         event.stopPropagation();
         let itemKey = event.target.id;
@@ -52,7 +53,38 @@ export default class ItemCard extends React.Component {
         this.props.renameItemCallback(id, textValue);
         this.handleToggleEdit();
     }
+    handleDragStart = (event) =>{ //When an item has begun to be dragged
+        let itemKey = event.target.id;
+        if (itemKey.startsWith("item-card-text-")) {
+            itemKey = itemKey.substring("item-card-text-".length);
+        }
+        this.props.selectItemCallback(itemKey);
+       
+    }
+    handleDragOver = (event) => { //When dragging
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    handleDragLeave = (event) =>{ //When move over another item WANT TO HIGHLIGHT
+        event.preventDefault();
+        let text = this.state.text;
+        // console.log(text);
+     
+    }
+    handleDrop = (event) =>{ //When Drag is let go
+        // event.preventDefault();
+        // event.stopPropagation();
+       
+        console.log("hello");
+        let itemKey = event.target.id;
+        if (itemKey.startsWith("item-card-text-")) {
+            itemKey = itemKey.substring("item-card-text-".length);
+        }
+         this.props.dropItemCallback(itemKey);
+        
 
+
+    }
     render() {
         const { keyNamePair, selected, id } = this.props;
 
@@ -76,14 +108,16 @@ export default class ItemCard extends React.Component {
             if (selected) {
                 selectClass = "selected-item-card";
             }
-            // console.log("displaying itemCard");
-            // console.log(keyNamePair);
-            // console.log(id);
             return (
-                <div
+                <div 
+                draggable
                     id={id}
                     key={id}
                     onClick={this.handleClick}
+                    onDragStart={this.handleDragStart}
+                    onDragOver={this.handleDragOver}
+                    onDragLeave ={this.handleDragLeave}
+                    onDrop = {this.handleDrop}
                     className={'top5-item ' + selectClass}>
                     <span
                         id={"item-card-text-" + id}

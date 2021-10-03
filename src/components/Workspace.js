@@ -9,7 +9,9 @@ export default class Workspace extends React.Component {
             currentList,
             currentItemKey,
             selectItemCallback,
-            renameItemCallback
+            renameItemCallback,
+            dropped,
+            dropItemCallback
         } = this.props;
         if (currentList){
         return (
@@ -31,13 +33,19 @@ export default class Workspace extends React.Component {
                         {
                             currentList.items.map(function(item, index){
                                 return (
+                                        
                                 <ItemCard
+                                
                                     id={index}
                                     key={index}
                                     keyNamePair={item}
                                     selected={(currentItemKey !== null) && (currentItemKey === item.key)}
                                     selectItemCallback={selectItemCallback}
                                     renameItemCallback={renameItemCallback}
+                                    dropItemCallback={dropItemCallback}
+                                    dropped = {dropped}
+                                   
+                                    
                             />
                                 )
                             })

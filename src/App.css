@@ -157,6 +157,8 @@ body {
 }
 
 .top5-button, .top5-button-disabled {
+  display: inline-flex;
+  align-items: center;
   font-size:36pt;
   border-width: 0px;
   float:left;
