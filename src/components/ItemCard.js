@@ -65,21 +65,77 @@ export default class ItemCard extends React.Component {
         event.stopPropagation();
         event.preventDefault();
     }
-    handleDragLeave = (event) =>{ //When move over another item WANT TO HIGHLIGHT
+
+    handleDragEnter = (event) => {
         event.preventDefault();
-        let text = this.state.text;
-        // console.log(text);
-     
+        let itemKey = event.target.className;
+        let itemId = event.target.id;
+        
+        if (itemKey.startsWith("top5-item")) {
+            event.target.className = "top5-item-dragged-to";
+            
+        }
+        if (itemId.startsWith("item-card-text")){
+            console.log(document.getElementById(itemId).parentElement.className);
+            let x = document.getElementById(itemId).parentElement.className;
+            if (x.startsWith("top5-item")){
+                if (x.includes('top5-item-dragged-to')){
+
+                }
+                else {
+                    event.target.parentElement.className += " top5-item-dragged-to";
+                }
+                
+            }
+        }
+        console.log(itemKey);
+        // add "hover" to id
+        // event.target.className = "top5-item-dragged-to";
+
     }
+    handleDragLeave = (event) =>{ //When move over another item WANT TO HIGHLIGHT
+        // event.target.className = "top5-item";
+        event.preventDefault();
+        let itemKey = event.target.className;
+        let itemId = event.target.id;
+        
+        if (itemKey.startsWith("top5-item-dragged-to")) {
+            event.target.className = "top5-item";
+            
+        }
+        if (itemId.startsWith("item-card-text")){
+            let x = document.getElementById(itemId).parentElement.className;
+            if (x.includes("top5-item-dragged-to")){
+                event.target.parentElement.className = "top5-item";
+                
+            }
+        }
+        console.log(itemKey);
+     }
     handleDrop = (event) =>{ //When Drag is let go
         // event.preventDefault();
         // event.stopPropagation();
-       
-        console.log("hello");
+        // event.target.className = "top5-item";
+        console.log("soldiefhiouawsehfiukaewhy"+event.target.className);
         let itemKey = event.target.id;
+        let itemClass = event.target.className;
         if (itemKey.startsWith("item-card-text-")) {
             itemKey = itemKey.substring("item-card-text-".length);
         }
+
+        if (itemClass.startsWith("top5-item-dragged-to")) {
+            event.target.className = "top5-item";
+            
+        }
+        if (itemClass.startsWith("item-card-text")){
+            event.target.parentElement.className = "top5-item";
+                
+            
+        }
+
+
+
+
          this.props.dropItemCallback(itemKey);
         
 
@@ -104,10 +160,12 @@ export default class ItemCard extends React.Component {
         }
         else {
 
-            let selectClass = "unselected-item-card";
-            if (selected) {
-                selectClass = "selected-item-card";
-            }
+            //  let selectClass = "unselected-item-card";
+           
+            // if (selected) {
+            //      selectClass = "selected-item-card";
+            //      selectClass = "";
+            // }
             return (
                 <div 
                 draggable
@@ -117,8 +175,9 @@ export default class ItemCard extends React.Component {
                     onDragStart={this.handleDragStart}
                     onDragOver={this.handleDragOver}
                     onDragLeave ={this.handleDragLeave}
+                    onDragEnter ={this.handleDragEnter}
                     onDrop = {this.handleDrop}
-                    className={'top5-item ' + selectClass}>
+                    className={'top5-item'}>
                     <span
                         id={"item-card-text-" + id}
                         key={id}

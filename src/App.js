@@ -208,7 +208,6 @@ class App extends React.Component {
         // let tempItem = this.state.currentList.items[e]
         // console.log(tempItem);
         this.setState({currentItemKey: e});
-        console.log(this.state.currentItemKey);
     }
   
     confirmDeleteList = (e) => {

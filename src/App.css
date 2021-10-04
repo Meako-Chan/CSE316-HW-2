@@ -197,7 +197,7 @@ body {
 
 .item-number, .top5-item, .top5-item-dragged-to { 
   display:flex;
-  align-items: center;
+  align-items: left;
   font-size: 24pt;
   height:20%;
 }
@@ -211,11 +211,7 @@ body {
   
 }
 
-/* .unselected-item-card:hover {
-  cursor: pointer;
-  background-color: var(--swatch-contrast);
-  color:white;
-} */
+
 
 .selected-item-card {
   background-color: var(--swatch-accent);
@@ -253,8 +249,14 @@ input {
   background-color: var(--swatch-complement);
 }
 .top5-item-dragged-to {
-  background-color: var(--swatch-accent);
+  /* background-color: var(--swatch-accent); */
+  background-color:#669966;
+  /* text-align: left;
+  width:95%;
+  padding-left:5%;
+  display: flex; */
 }
+
 
 .disabled {
   background-color: lightgray;
