@@ -183,8 +183,8 @@ class App extends React.Component {
             sessionData: prevState.sessionData
         }), () => {
             // ANY AFTER EFFECTS?
-            if(this.state.currentList.key !== key){
             document.getElementById("close-button").classList.replace("top5-button-disabled","top5-button")
+            if(this.state.currentList.key !== key){
             document.getElementById("undo-button").classList.replace("top5-button", "top5-button-disabled" );
             document.getElementById("redo-button").classList.replace("top5-button", "top5-button-disabled" );
             this.tps.clearAllTransactions();
