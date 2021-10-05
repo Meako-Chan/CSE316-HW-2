@@ -40,20 +40,20 @@ export default class ItemCard extends React.Component {
     handleUpdate = (event) => {
         this.setState({ text: event.target.value });
     }
-    handleKeyPress = (event) => {
+    handleKeyPress =(event) => {
         if (event.code === "Enter") {
             this.handleBlur();
         }
     }
     handleBlur = () => {
         let id = this.props.id;
-        console.log(id);
         let textValue = this.state.text;
-        console.log("itemCard handleBlur: " + textValue);
-        this.props.renameItemCallback(id, textValue);
+        // this.props.renameItemCallback(id, textValue);
+        this.props.addChangeItemTransactionCallback(id, textValue);
         this.handleToggleEdit();
     }
     handleDragStart = (event) =>{ //When an item has begun to be dragged
+        event.dataTransfer.setData("id", event.target.id);
         let itemKey = event.target.id;
         if (itemKey.startsWith("item-card-text-")) {
             itemKey = itemKey.substring("item-card-text-".length);
@@ -76,7 +76,6 @@ export default class ItemCard extends React.Component {
             
         }
         if (itemId.startsWith("item-card-text")){
-            console.log(document.getElementById(itemId).parentElement.className);
             let x = document.getElementById(itemId).parentElement.className;
             if (x.startsWith("top5-item")){
                 if (x.includes('top5-item-dragged-to')){
@@ -88,7 +87,6 @@ export default class ItemCard extends React.Component {
                 
             }
         }
-        console.log(itemKey);
         // add "hover" to id
         // event.target.className = "top5-item-dragged-to";
 
@@ -110,15 +108,20 @@ export default class ItemCard extends React.Component {
                 
             }
         }
-        console.log(itemKey);
+        
      }
     handleDrop = (event) =>{ //When Drag is let go
         // event.preventDefault();
         // event.stopPropagation();
-        // event.target.className = "top5-item";
-        console.log("soldiefhiouawsehfiukaewhy"+event.target.className);
+        // event.target.className = "top5-item"
+        let index = event.dataTransfer.getData("id");
+        
+      
         let itemKey = event.target.id;
+        
         let itemClass = event.target.className;
+        let state = this.state.id;
+        // event.dataTransfer.getData("id").slice(5)-1, this.state.itemKey.slice(5)-1;
         if (itemKey.startsWith("item-card-text-")) {
             itemKey = itemKey.substring("item-card-text-".length);
         }
@@ -134,13 +137,16 @@ export default class ItemCard extends React.Component {
         }
 
 
-
-
-         this.props.dropItemCallback(itemKey);
-        
-
-
+        if(index !== itemKey ){
+        this.props.addMoveItemTransactionCallback(index,itemKey);
+        }
+        //  this.props.dropItemCallback(itemKey);
     }
+
+   
+
+    
+  
     render() {
         const { keyNamePair, selected, id } = this.props;
 
@@ -148,15 +154,29 @@ export default class ItemCard extends React.Component {
 
         if (this.state.editActive) {
             return (
-                <input
-                    id={"item-" + keyNamePair}
-                    className='item-card'
-                    type='text'
+                <div 
+               
+                    id={id}
+                    key={id}
+                    onClick={this.handleClick}
+                    onDragStart={this.handleDragStart}
+                    onDragOver={this.handleDragOver}
+                    onDragLeave ={this.handleDragLeave}
+                    onDragEnter ={this.handleDragEnter}
+                    onDrop = {this.handleDrop}
                     onKeyPress={this.handleKeyPress}
+                    className={'top5-item'}>
+                    <input
+                    id={"item-" + keyNamePair}
+                    className='edit-items'
+                    type='text'
+                    // onKeyPress={this.handleKeyPress}
                     onBlur={this.handleBlur}
                     onChange={this.handleUpdate}
-                    defaultValue={keyNamePair.name}
-                />)
+                    defaultValue={this.props.keyNamePair}
+                /></div>
+            )   
+                
         }
         else {
 
@@ -177,13 +197,9 @@ export default class ItemCard extends React.Component {
                     onDragLeave ={this.handleDragLeave}
                     onDragEnter ={this.handleDragEnter}
                     onDrop = {this.handleDrop}
+                    onKeyPress={this.handleKeyPress}
                     className={'top5-item'}>
-                    <span
-                        id={"item-card-text-" + id}
-                        key={id}
-                        className="item-card-text">
-                        {keyNamePair}
-                    </span>
+                    {this.props.keyNamePair}
                 </div>
             );
         }

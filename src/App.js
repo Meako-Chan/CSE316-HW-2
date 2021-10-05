@@ -3,6 +3,9 @@ import './App.css';
 
 // IMPORT DATA MANAGEMENT AND TRANSACTION STUFF
 import DBManager from './db/DBManager';
+import jsTPS from './db/jsTPS';
+import MoveItem_Transaction from './db/MoveItem_Transaction';
+import ChangeItem_Transaction from './db/ChangeItem_Transaction';
 
 // THESE ARE OUR REACT COMPONENTS
 import DeleteModal from './components/DeleteModal';
@@ -20,6 +23,9 @@ class App extends React.Component {
 
         // GET THE SESSION DATA FROM OUR DATA MANAGER
         let loadedSessionData = this.db.queryGetSessionData();
+
+        // This will manage our transactions
+        this.tps = new jsTPS();
 
         // SETUP THE INITIAL STATE
         this.state = {
@@ -116,16 +122,18 @@ class App extends React.Component {
         });
         
     }
-    dropItem = (e) =>{
+    dropItem = (index1, index2) =>{
         let items = this.state.currentList.items;
-        
-        let index1 = this.state.currentItemKey;
-        let index2 = e;
+        // let index1 = this.state.currentItemKey;
+        // let index2 = e;
         let item1 = this.state.currentList.items[index1];
-        items.splice(index1, 1);
-        items.splice(index2,0, item1);
+        console.log(this.tps);
+        // items.splice(index1, 1);
+        // items.splice(index2,0, item1);
         
-
+        items.splice(index2,0, items.splice(index1,1)[0]);
+        // this.tps.addMoveItemTransaction();
+        // this.tps.addMoveItemTransaction(index1-1, )
         let tempList = this.state.currentList;
         let tempItems = tempList.items;
         tempItems = items;
@@ -134,7 +142,6 @@ class App extends React.Component {
             currentList: tempList
         }), () => {
             // ANY AFTER EFFECTS?
-            console.log(this.state.currentList.items);
          
             this.db.mutationUpdateList(this.state.currentList);
             this.db.mutationUpdateSessionData(this.state.sessionData);
@@ -145,8 +152,6 @@ class App extends React.Component {
     }
     renameItem = (id, newName) => {
         let items = this.state.currentList.items;
-        console.log(this.state.sessionData);
-        console.log(this.state.currentList);
         // NOW GO THROUGH THE ARRAY AND FIND THE ONE TO RENAME
         for (let i = 0; i < items.length; i++) {
             let tempItem = items[i];
@@ -154,7 +159,7 @@ class App extends React.Component {
                 items[i] = newName;
             }
         }
-        console.log(items);
+        console.log(this.tps);
         //  this.sortItemsByName(items);
 
         let tempList = this.state.currentList;
@@ -192,9 +197,8 @@ class App extends React.Component {
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL
-        console.log(e);
         this.setState({deleteSelectedList : e});
-        console.log(this.state.sessionData);
+ 
 
         this.showDeleteListModal();
         
@@ -204,12 +208,26 @@ class App extends React.Component {
     selectItem = (e) => {
         // changed the currentItem to e
         // Note: e is the id/position of the item
-        // console.log(e);
         // let tempItem = this.state.currentList.items[e]
         // console.log(tempItem);
         this.setState({currentItemKey: e});
     }
-  
+    handleKeyPress = (event) => {
+       
+        if(event.ctrlKey && event.key === 'z'){
+            console.log(this.tps);
+            this.undo();
+        }
+        if(event.ctrlKey && event.key=== 'y'){
+            this.redo();
+        }
+    }
+    componentDidMount(){
+        document.addEventListener('keydown',this.handleKeyPress)
+    }
+    componentWillUnmount(){
+        document.removeEventListener('keydown',this.handleKeyPress);
+      }
     confirmDeleteList = (e) => {
         let x = this.state.sessionData;
         let newKeyNamePairs = x.keyNamePairs;
@@ -219,27 +237,28 @@ class App extends React.Component {
         x.keyNamePairs = newKeyNamePairs;
         this.setState({x});
         let updatedPairs = newKeyNamePairs;
-        for(let i=0; i< updatedPairs.length;i++){
-            updatedPairs[i].key = i;
-        }
-        console.log(updatedPairs);
+       
         this.setState(prevState => ({
             currentList: null,
-            sessionData: {
-                nextKey: prevState.sessionData.nextKey - 1,
-                counter: prevState.sessionData.counter - 1,
-                keyNamePairs: updatedPairs
-            }
+            // sessionData: {
+            //     nextKey: prevState.sessionData.nextKey - 1,
+            //     counter: prevState.sessionData.counter - 1,
+            //     keyNamePairs: updatedPairs
+            // }
         }), () => {
             // PUTTING THIS NEW LIST IN PERMANENT STORAGE
             // IS AN AFTER EFFECT
-            let CurrentDeleteList = this.db.queryGetList(this.state.deleteSelectedList.key);
+            
+        
+        let CurrentDeleteList = this.db.queryGetList(this.state.deleteSelectedList.key);
         // CurrentDeleteList = null;
-        console.log(CurrentDeleteList);
         // this.db.mutationUpdateList(CurrentDeleteList);
         this.db.queryDeleteList(this.state.deleteSelectedList.key);
+        
         this.db.mutationUpdateSessionData(this.state.sessionData);
-
+        // for(let i=0; i< updatedPairs.length;i++){
+        //     updatedPairs[i].key = i;
+        // }
         this.hideDeleteListModal(); // hide after deleting
     
         });
@@ -256,12 +275,68 @@ class App extends React.Component {
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
     }
+    addChangeItemTransaction = (id, newText) => {
+        let oldText = this.state.currentList.items[id];
+        let transaction = new ChangeItem_Transaction(this, id, oldText, newText);
+        this.tps.addTransaction(transaction);
+        //update buttons
+    }
+    addMoveItemTransaction = (oldIndex,newIndex) => {
+        // Get text
+        let transaction = new MoveItem_Transaction(this, oldIndex, newIndex);
+        this.tps.addTransaction(transaction);
+        //update buttons
+    }
+    undo = () => {
+        if (this.tps.hasTransactionToUndo()) {
+            this.tps.undoTransaction();
+            console.log(this.tps);
+            //Update buttons
+        }
+    }
+    redo = () =>{
+        if(this.tps.hasTransactionToRedo()) {
+            this.tps.redoTransaction();
+            console.log(this.tps);
+            //Update buttons
+        }
+        }
+    hasUndo = () =>{
+        return this.tps.hasTransactionToUndo();
+    }
+    hasRedo = () =>{
+        return this.tps.hasTransactionToRedo();
+    }
+    moveItem = (oldIndex, newIndex) => {
+        let items = this.state.currentList.items;
+        let tempList = this.state.currentList;
+        let tempItems = tempList.items;
+        items.splice(newIndex, 0, items.splice(oldIndex, 1)[0]);
+        tempItems = items;
+     
+        this.setState(prevState => ({
+            currentList: tempList
+        }), () => {
+            // ANY AFTER EFFECTS?
+         
+            this.db.mutationUpdateList(this.state.currentList);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
+        });
+    }
+    changeItem = (id,text) => {
+        this.currentList.items[id] = text;
+        //prob move to renameItem
+    }
+
     render() {
         return (
             <div id="app-root">
                 <Banner 
                     title='Top 5 Lister'
-                    closeCallback={this.closeCurrentList} />
+                    closeCallback={this.closeCurrentList} 
+                    undoCallback ={this.undo}
+                    redoCallback = {this.redo}
+                    />
                 <Sidebar
                     heading='Your Lists'
                     currentList={this.state.currentList}
@@ -270,9 +345,11 @@ class App extends React.Component {
                     deleteListCallback={this.deleteList}
                     loadListCallback={this.loadList}
                     renameListCallback={this.renameList}
+                    hasUndoCallback={this.hasUndo}
+                    hasRedoCallback={this.hasRedo}
                 />
                 <Workspace
-                    currentList={this.state.currentList} currentItemKey={this.state.currentItemKey} selectItemCallback={this.selectItem} renameItemCallback={this.renameItem} dropItemCallback={this.dropItem} dropped ={this.state.dropped}/>
+                    currentList={this.state.currentList} currentItemKey={this.state.currentItemKey} selectItemCallback={this.selectItem} renameItemCallback={this.renameItem} dropItemCallback={this.dropItem} dropped ={this.state.dropped} addChangeItemTransactionCallback = {this.addChangeItemTransaction} addMoveItemTransactionCallback ={this.addMoveItemTransaction}/>
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal
@@ -280,6 +357,7 @@ class App extends React.Component {
                     deleteSelectedList={this.state.deleteSelectedList}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
                     confirmDeleteListCallback={this.confirmDeleteList}
+
                 />
             </div>
         );

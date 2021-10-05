@@ -1,4 +1,5 @@
 import React from "react";
+import ChangeItem_Transaction from "../db/ChangeItem_Transaction";
 import ItemCard from "./ItemCard";
 
 
@@ -11,7 +12,9 @@ export default class Workspace extends React.Component {
             selectItemCallback,
             renameItemCallback,
             dropped,
-            dropItemCallback
+            dropItemCallback,
+            addChangeItemTransactionCallback,
+            addMoveItemTransactionCallback
         } = this.props;
         if (currentList){
         return (
@@ -25,7 +28,7 @@ export default class Workspace extends React.Component {
                         <div className="item-number">5.</div>
                     </div>
                     <div id="edit-items">
-                        {/* <div className="top5-item">{currentList.items[0]}</div>
+                        {/*== <div className="top5-item">{currentList.items[0]}</div>
                         <div className="top5-item">{ currentList.items[1]}</div>
                         <div className="top5-item">{currentList.items[2]}</div>
                         <div className="top5-item">{currentList.items[3]}</div>
@@ -43,10 +46,15 @@ export default class Workspace extends React.Component {
                                     selectItemCallback={selectItemCallback}
                                     renameItemCallback={renameItemCallback}
                                     dropItemCallback={dropItemCallback}
+                                    addChangeItemTransactionCallback ={addChangeItemTransactionCallback}
+                                    addMoveItemTransactionCallback = {addMoveItemTransactionCallback}
                                     dropped = {dropped}
                                    
                                     
                             />
+                            //     <ChangeItem_Transaction
+                            //         renameItemCallback={renameItemCallback}
+                            // />
                                 )
                             })
                         }
