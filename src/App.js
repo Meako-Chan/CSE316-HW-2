@@ -186,6 +186,7 @@ class App extends React.Component {
             document.getElementById("close-button").classList.replace("top5-button-disabled","top5-button")
             document.getElementById("undo-button").classList.replace("top5-button", "top5-button-disabled" );
             document.getElementById("redo-button").classList.replace("top5-button", "top5-button-disabled" );
+            this.tps.clearAllTransactions();
             
         });
     }
@@ -200,6 +201,7 @@ class App extends React.Component {
             document.getElementById("close-button").classList.replace("top5-button","top5-button-disabled")
             document.getElementById("undo-button").classList.replace("top5-button","top5-button-disabled")
             document.getElementById("redo-button").classList.replace("top5-button","top5-button-disabled")
+            this.tps.clearAllTransactions();
         });
     }
     deleteList = (e) => {
@@ -271,7 +273,7 @@ class App extends React.Component {
         //     updatedPairs[i].key = i;
         // }
         this.hideDeleteListModal(); // hide after deleting
-        
+        this.tps.clearAllTransactions();
     
         });
     
