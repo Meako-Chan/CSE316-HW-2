@@ -13,6 +13,7 @@ import Banner from './components/Banner.js'
 import Sidebar from './components/Sidebar.js'
 import Workspace from './components/Workspace.js';
 import Statusbar from './components/Statusbar.js'
+import ItemCard from './components/ItemCard';
 
 class App extends React.Component {
     constructor(props) {
@@ -142,9 +143,11 @@ class App extends React.Component {
             currentList: tempList
         }), () => {
             // ANY AFTER EFFECTS?
-         
+            this.updateToolBars();
             this.db.mutationUpdateList(this.state.currentList);
             this.db.mutationUpdateSessionData(this.state.sessionData);
+            
+
         });
       
         
@@ -165,10 +168,9 @@ class App extends React.Component {
         let tempList = this.state.currentList;
         let tempItems = tempList.items;
         tempItems = items;
-        console.log(tempList);
         this.setState({currentList: tempList});
-        console.log(this.state);
         this.db.mutationUpdateList(tempList);
+        this.updateToolBars();
     
         
     }
@@ -180,6 +182,7 @@ class App extends React.Component {
             sessionData: prevState.sessionData
         }), () => {
             // ANY AFTER EFFECTS?
+            document.getElementById("close-button").classList.replace("top5-button-disabled","top5-button")
         });
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
@@ -190,6 +193,9 @@ class App extends React.Component {
             sessionData: this.state.sessionData
         }), () => {
             // ANY AFTER EFFECTS?
+            document.getElementById("close-button").classList.replace("top5-button","top5-button-disabled")
+            document.getElementById("undo-button").classList.replace("top5-button","top5-button-disabled")
+            document.getElementById("redo-button").classList.replace("top5-button","top5-button-disabled")
         });
     }
     deleteList = (e) => {
@@ -248,8 +254,9 @@ class App extends React.Component {
         }), () => {
             // PUTTING THIS NEW LIST IN PERMANENT STORAGE
             // IS AN AFTER EFFECT
-            
-        
+            document.getElementById("close-button").classList.replace("top5-button","top5-button-disabled")
+            document.getElementById("undo-button").classList.replace("top5-button","top5-button-disabled")
+            document.getElementById("redo-button").classList.replace("top5-button","top5-button-disabled")
         let CurrentDeleteList = this.db.queryGetList(this.state.deleteSelectedList.key);
         // CurrentDeleteList = null;
         // this.db.mutationUpdateList(CurrentDeleteList);
@@ -260,6 +267,7 @@ class App extends React.Component {
         //     updatedPairs[i].key = i;
         // }
         this.hideDeleteListModal(); // hide after deleting
+        
     
         });
     
@@ -279,25 +287,29 @@ class App extends React.Component {
         let oldText = this.state.currentList.items[id];
         let transaction = new ChangeItem_Transaction(this, id, oldText, newText);
         this.tps.addTransaction(transaction);
+        this.updateToolBars();
         //update buttons
     }
     addMoveItemTransaction = (oldIndex,newIndex) => {
         // Get text
         let transaction = new MoveItem_Transaction(this, oldIndex, newIndex);
         this.tps.addTransaction(transaction);
+        this.updateToolBars();
         //update buttons
     }
     undo = () => {
-        if (this.tps.hasTransactionToUndo()) {
+        if (this.hasUndo()) {
             this.tps.undoTransaction();
             console.log(this.tps);
+            this.updateToolBars();
             //Update buttons
         }
     }
     redo = () =>{
-        if(this.tps.hasTransactionToRedo()) {
+        if(this.hasRedo()) {
             this.tps.redoTransaction();
             console.log(this.tps);
+            this.updateToolBars();
             //Update buttons
         }
         }
@@ -307,26 +319,40 @@ class App extends React.Component {
     hasRedo = () =>{
         return this.tps.hasTransactionToRedo();
     }
-    moveItem = (oldIndex, newIndex) => {
-        let items = this.state.currentList.items;
-        let tempList = this.state.currentList;
-        let tempItems = tempList.items;
-        items.splice(newIndex, 0, items.splice(oldIndex, 1)[0]);
-        tempItems = items;
+    updateToolBars =() =>{
+        if (!this.tps.hasTransactionToUndo()) {
+            document.getElementById("undo-button").classList.replace("top5-button", "top5-button-disabled" );
+        }
+        else {
+            document.getElementById("undo-button").classList.replace("top5-button-disabled", "top5-button");
+        } 
+        if (!this.tps.hasTransactionToRedo()) { 
+            document.getElementById("redo-button").classList.replace("top5-button", "top5-button-disabled" );
+        }
+        else {
+            document.getElementById("redo-button").classList.replace("top5-button-disabled", "top5-button");
+        } 
+    }
+    // moveItem = (oldIndex, newIndex) => {
+    //     let items = this.state.currentList.items;
+    //     let tempList = this.state.currentList;
+    //     let tempItems = tempList.items;
+    //     items.splice(newIndex, 0, items.splice(oldIndex, 1)[0]);
+    //     tempItems = items;
      
-        this.setState(prevState => ({
-            currentList: tempList
-        }), () => {
-            // ANY AFTER EFFECTS?
+    //     this.setState(prevState => ({
+    //         currentList: tempList
+    //     }), () => {
+    //         // ANY AFTER EFFECTS?
          
-            this.db.mutationUpdateList(this.state.currentList);
-            this.db.mutationUpdateSessionData(this.state.sessionData);
-        });
-    }
-    changeItem = (id,text) => {
-        this.currentList.items[id] = text;
-        //prob move to renameItem
-    }
+    //         this.db.mutationUpdateList(this.state.currentList);
+    //         this.db.mutationUpdateSessionData(this.state.sessionData);
+    //     });
+    // }
+    // changeItem = (id,text) => {
+    //     this.currentList.items[id] = text;
+    //     //prob move to renameItem
+    // }
 
     render() {
         return (

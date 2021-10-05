@@ -15,6 +15,7 @@ export default class ListCard extends React.Component {
         }
         else if (event.detail === 2) {
             this.handleToggleEdit(event);
+            document.getElementById("close-button").classList.replace("top5-button","top5-button-disabled")
         }
     }
     handleLoadList = (event) => {
@@ -47,6 +48,7 @@ export default class ListCard extends React.Component {
         console.log("ListCard handleBlur: " + textValue);
         this.props.renameListCallback(key, textValue);
         this.handleToggleEdit();
+        document.getElementById("close-button").classList.replace("top5-button-disabled","top5-button")
     }
 
     render() {
