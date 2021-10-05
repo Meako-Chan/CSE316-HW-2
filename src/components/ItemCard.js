@@ -38,6 +38,7 @@ export default class ItemCard extends React.Component {
         });
     }
     handleUpdate = (event) => {
+
         this.setState({ text: event.target.value });
     }
     handleKeyPress =(event) => {
@@ -48,6 +49,8 @@ export default class ItemCard extends React.Component {
     handleBlur = () => {
         let id = this.props.id;
         let textValue = this.state.text;
+        console.log(this.state.key);
+        console.log(textValue);
         // this.props.renameItemCallback(id, textValue);
         this.props.addChangeItemTransactionCallback(id, textValue);
         this.handleToggleEdit();

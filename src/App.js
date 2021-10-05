@@ -284,10 +284,12 @@ class App extends React.Component {
         modal.classList.remove("is-visible");
     }
     addChangeItemTransaction = (id, newText) => {
+        if(this.state.currentList.items[id] !== newText){
         let oldText = this.state.currentList.items[id];
         let transaction = new ChangeItem_Transaction(this, id, oldText, newText);
         this.tps.addTransaction(transaction);
         this.updateToolBars();
+        }
         //update buttons
     }
     addMoveItemTransaction = (oldIndex,newIndex) => {
